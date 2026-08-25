@@ -6,8 +6,8 @@ A single-page practice quiz for the U.S. Forces Japan SOFA driver's permit test.
 
 ## Features
 
-- **169 questions** across four topics — road signs (83), rules of the road (45), licensing & paperwork (22), signals & markings (19).
-- **93 embedded sign images**, so 89 of the questions can ask you to identify an actual Japanese road sign.
+- **172 questions** across four topics — road signs (83), rules of the road (48), licensing & paperwork (22), signals & markings (19).
+- **93 embedded sign images and 3 manual diagrams**, so visual questions include the source material to identify.
 - **Session setup** — filter to one topic or the whole bank, choose 20 questions, 50, or the full bank, and toggle question shuffling.
 - **Immediate feedback** — answer options are shuffled per question; a wrong pick shows the correct answer, why it's correct, and the briefing page it came from.
 - **Results breakdown** — overall score, a per-topic bar chart, and a list of everything you missed.
@@ -16,7 +16,7 @@ A single-page practice quiz for the U.S. Forces Japan SOFA driver's permit test.
 
 ## Running it
 
-The whole app is one self-contained `index.html` — no build step, no dependencies, no server required. Open the file in a browser, or serve the directory:
+The app is static — no build step, dependencies, or server required. Open `index.html` in a browser, or serve the directory:
 
 ```sh
 python -m http.server 8000
@@ -40,7 +40,7 @@ Questions live in the `BANK` array inside `index.html`. Each entry looks like:
 }
 ```
 
-Sign images are keyed in the `IMAGES` object as base64 data URIs. To add a question, append an object to `BANK`; per-topic counts on the setup screen update automatically.
+Images are keyed in the `IMAGES` object as base64 data URIs or local asset paths. To add a question, append an object to `BANK`; per-topic counts on the setup screen update automatically.
 
 The bank is also exposed to embedding pages over `postMessage` — post `"sofa-flashcards:request"` to the frame and it replies with `{type: "sofa-flashcards:data", bank, images, categories, categoryNames}`.
 
