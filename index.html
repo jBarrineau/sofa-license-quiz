@@ -18,6 +18,8 @@
   --permit:#0B63A8;   /* Japanese regulatory blue = permitted */
   --prohibit:#D7192D; /* Japanese regulatory red = prohibited */
   --warn:#F2C200;
+  --link:#1157C7;     /* link blue, distinct from the regulatory permit blue */
+  --link-hot:#0B3D8C;
   --radius:4px;
   --wrap:760px;
 }
@@ -75,8 +77,21 @@ h1 .jp{display:block;font-size:.44em;font-weight:700;letter-spacing:.32em;color:
 }
 .srcline .page{
   font-family:"Roboto Mono",monospace;font-size:12.5px;font-weight:500;
-  color:var(--permit);
 }
+/* the page reference links into the study guide PDF, so it carries the
+   underline and the link blue rather than sitting there looking like a label */
+a.page,.miss .src a{
+  color:var(--link);
+  text-decoration:underline;
+  text-underline-offset:3px;
+  text-decoration-thickness:1px;
+  padding:2px 0;                 /* a little more to hit on touch */
+}
+a.page:hover,.miss .src a:hover{color:var(--link-hot);text-decoration-thickness:2px}
+a.page:focus-visible,.miss .src a:focus-visible{
+  outline:2px solid var(--link);outline-offset:3px;border-radius:2px;
+}
+a.page::after{content:"↗";font-size:.85em;margin-left:3px;display:inline-block}
 .miss .src{
   font-family:"Roboto Mono",monospace;font-size:11px;letter-spacing:.08em;
   text-transform:uppercase;color:var(--ink-soft);margin:6px 0 0;
@@ -357,7 +372,7 @@ body.quiz-live.answered #nextBtn{padding:11px 24px;font-size:16px}
   <h2 class="qtext" id="qtext"></h2>
   <div class="answers" id="answers"></div>
   <div id="why" class="why hidden"><b id="whyLabel">Why</b><p id="whyText"></p>
-    <p class="srcline"><span class="tag">Study guide</span><span class="page" id="srcRef"></span></p>
+    <p class="srcline"><span class="tag">Study guide</span><a class="page" id="srcRef" href="#" target="_blank" rel="noopener"></a></p>
   </div>
 <div id="nextWrap" class="btnrow hidden"><button class="go quiet" id="nextBtn">Next question</button></div>
   <div class="hint">Keys 1–4 to answer · Enter for next</div>
@@ -442,6 +457,13 @@ BANK.push(
   {"cat": "admin", "q": "What insurance coverage must a SOFA vehicle carry?", "options": ["No insurance on station", "Minimum coverage in accordance with SOFA rules", "JCI only", "Any US policy regardless of local coverage"], "a": 1, "why": "SOFA vehicles must carry the minimum insurance coverage required by SOFA rules.", "p": 17},
   {"cat": "signals", "q": "What does the road warning 追突注意 mean?", "options": ["Watch for falling rocks", "Rear-end collision warning", "School zone ahead", "No overtaking"], "a": 1, "why": "追突注意 warns drivers to take care against rear-end collisions.", "p": 69}
 );
+
+/* The study guide PDF sits beside this page. Its PDF page numbers line up
+   1:1 with the q.p references in the bank, and the #page= fragment is
+   honoured by the Chrome, Edge, Firefox and desktop Safari PDF viewers.
+   iOS Safari ignores it and simply opens the guide at page 1. */
+const GUIDE_PDF = "Training for SOFA License.pdf";
+const guidePage = p => encodeURI(GUIDE_PDF) + "#page=" + p;
 
 const SOURCE_VISUALS = {
   "A police car comes up behind you with its lights on and its siren and/or loudspeaker going. You must:": ["police_11", "Japanese police vehicles"],
@@ -589,7 +611,10 @@ function choose(picked){
 
   $("whyLabel").textContent = right ? "That's right" : "The rule";
   $("whyText").textContent = q.why;
-  $("srcRef").textContent = "Page " + q.p;
+  const srcRef = $("srcRef");
+  srcRef.textContent = "Page " + q.p;
+  srcRef.href = guidePage(q.p);
+  srcRef.title = "Open the study guide at page " + q.p + " (new tab)";
   $("why").classList.remove("hidden");
   $("nextWrap").classList.remove("hidden");
   $("nextBtn").focus({preventScroll:true});
@@ -641,7 +666,7 @@ function finish(){
     $("missedList").innerHTML = misses.map(q => `
       <div class="miss">
         <div>${q.img && IMAGES[q.img] ? `<img src="${IMAGES[q.img]}" alt="${q.alt || ""}">` : ""}</div>
-        <div><p class="qq">${q.q}</p><p class="aa"><em>${q.options[q.a]}</em> — ${q.why}</p><p class="src">Study guide · page ${q.p}</p></div>
+        <div><p class="qq">${q.q}</p><p class="aa"><em>${q.options[q.a]}</em> — ${q.why}</p><p class="src">Study guide · <a href="${guidePage(q.p)}" target="_blank" rel="noopener">page ${q.p}</a></p></div>
       </div>`).join("");
     $("retryBtn").classList.remove("hidden");
     $("retryBtn").textContent = `Retry the ${misses.length} misses`;
