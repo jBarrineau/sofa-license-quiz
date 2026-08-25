@@ -23,6 +23,9 @@
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
+/* reserve the scrollbar gutter so the explanation appearing cannot narrow
+   the page and rewrap the answers under the reader */
+html{scrollbar-gutter:stable}
 body{
   background:var(--concrete);
   color:var(--ink);
@@ -131,7 +134,7 @@ button.go.ghost{background:transparent;color:var(--ink);border:1px solid var(--l
 
 .answers{display:grid;gap:9px}
 .ans{
-  display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:12px;text-align:left;
+  display:grid;grid-template-columns:30px 1fr 90px;align-items:center;gap:12px;text-align:left;
   font:inherit;font-size:16.5px;line-height:1.4;background:var(--paint);color:var(--ink);
   border:1px solid var(--line);border-radius:var(--radius);padding:13px 15px;cursor:pointer;
   transition:border-color .12s,background .12s;width:100%;
@@ -140,7 +143,7 @@ button.go.ghost{background:transparent;color:var(--ink);border:1px solid var(--l
 .ans:disabled{cursor:default}
 .ans .key{font-family:"Roboto Mono",monospace;font-size:12px;color:var(--ink-soft);
   border:1px solid var(--line);border-radius:3px;text-align:center;line-height:22px;height:24px}
-.ans .verdict{font-family:"Roboto Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:0}
+.ans .verdict{font-family:"Roboto Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;text-align:right;opacity:0}
 .ans.correct{border-color:var(--permit);border-width:2px;background:#F1F7FC;padding:12px 14px}
 .ans.correct .key{border-color:var(--permit);color:var(--permit)}
 .ans.correct .verdict{opacity:1;color:var(--permit)}
@@ -154,6 +157,8 @@ button.go.ghost{background:transparent;color:var(--ink);border:1px solid var(--l
   text-transform:uppercase;color:var(--ink-soft);margin-bottom:5px;font-weight:500}
 .why p{margin:0;font-size:15.5px;line-height:1.5}
 .hint{margin-top:14px;font-family:"Roboto Mono",monospace;font-size:11px;letter-spacing:.08em;color:var(--ink-soft)}
+/* keys 1-4 / Enter mean nothing on a phone - and the line costs real room */
+@media (hover:none),(pointer:coarse){.hint{display:none}}
 
 /* ---------- results ---------- */
 .score{display:flex;align-items:baseline;gap:14px;margin-bottom:4px}
@@ -194,7 +199,7 @@ body.quiz-live{height:100dvh;overflow:hidden;padding-bottom:0}
 body.quiz-live .wrap{height:100%;display:flex;flex-direction:column;padding-bottom:8px}
 body.quiz-live header{flex:none;padding:12px 0 0}
 body.quiz-live h1{font-size:clamp(20px,3.4vw,26px);margin:2px 0 8px}
-body.quiz-live h1 .jp{display:inline;font-size:.5em;margin:0 0 0 12px;letter-spacing:.22em}
+body.quiz-live h1 .jp{display:inline;font-size:.5em;margin:0 0 0 12px;letter-spacing:.22em;white-space:nowrap}
 body.quiz-live .rule{height:7px;grid-template-rows:4px 3px;margin-bottom:12px}
 body.quiz-live #progress{flex:none}
 body.quiz-live .road{height:20px}
@@ -240,6 +245,65 @@ body.quiz-live.answered #nextBtn{padding:11px 24px;font-size:16px}
   body.quiz-live header{padding:8px 0 0}
   body.quiz-live h1{font-size:19px;margin:0 0 6px}
   body.quiz-live #quiz{padding:14px 18px 12px}
+}
+/* ---------- phones and other touch devices ----------
+   The fit-to-viewport layout above assumes a screen tall enough to hold the
+   sign, the question, four answers AND the explanation at once. No phone is:
+   once answered, the card overflows by 47px on a large phone and by 500px+ on
+   a small one, which put "Next question" off screen inside a scroller with no
+   visible affordance. On touch the page scrolls normally instead, the sign is
+   shown at a size you can read, and Next rides the bottom of the screen. */
+@media (max-width:700px),(hover:none) and (pointer:coarse){
+  body.quiz-live{height:auto;min-height:100dvh;overflow:visible;padding:10px 18px 14px}
+  /* the masthead is dead weight while a question is up: the progress bar
+     already says which question this is, so drop it and start the question
+     near the top of the screen instead */
+  body.quiz-live header{display:none}
+  body.quiz-live .status{margin-bottom:10px}
+  body.quiz-live .wrap{height:auto;display:block;padding-bottom:0}
+  body.quiz-live #quiz,
+  body.quiz-live #quiz:has(#plaque.hidden){display:block;overflow:visible;padding:14px 18px 14px}
+  body.quiz-live .qhead{margin-bottom:8px}
+  body.quiz-live .qtext,body.quiz-live.answered .qtext{font-size:19px;margin-bottom:14px}
+
+  /* the sign gets its natural proportions back instead of being flattened
+     into a 42px sliver by the leftover vertical space */
+  body.quiz-live .plaque,
+  body.quiz-live.answered .plaque{flex:none;min-height:0;max-height:none;padding:12px;margin-bottom:14px}
+  body.quiz-live .plaque img{width:150px;height:150px;max-height:none}
+  body.quiz-live .plaque.wide img,
+  body.quiz-live.answered .plaque.wide img{width:100%;height:auto;max-height:60vh}
+
+  /* the verdict word appeared in a third column and took ~55px off the option
+     text the instant you tapped, rewrapping the highlighted rows mid-read.
+     Mark the answer in the key slot instead - the row is exactly as wide
+     before and after - and leave the words to screen readers */
+  .ans{grid-template-columns:30px 1fr}
+  .ans .verdict{position:absolute;width:1px;height:1px;margin:-1px;padding:0;
+    border:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+  .ans.correct .key,.ans.wrong .key{font-size:0}
+  .ans.correct .key::after,.ans.wrong .key::after{font-size:15px}
+  .ans.correct .key::after{content:"✓"}
+  .ans.wrong .key::after{content:"✕"}
+
+  /* nothing needs squeezing now that the page can scroll */
+  body.quiz-live .answers,body.quiz-live.answered .answers{gap:9px}
+  body.quiz-live.answered #quiz{padding-bottom:14px}
+  body.quiz-live.answered #nextWrap{margin-top:16px}
+  body.quiz-live .ans,body.quiz-live.answered .ans{font-size:16.5px;padding:13px 15px}
+  body.quiz-live .ans.correct,body.quiz-live .ans.wrong,
+  body.quiz-live.answered .ans.correct,body.quiz-live.answered .ans.wrong{padding:12px 14px}
+  body.quiz-live .why,body.quiz-live.answered .why{max-height:none;overflow:visible;margin-top:16px;padding:14px 16px}
+  body.quiz-live .why p{font-size:15.5px}
+
+  /* Next sticks to the bottom edge while the card is in view, so it is
+     reachable the moment an answer is tapped, however long the explanation */
+  body.quiz-live #nextWrap{
+    position:sticky;bottom:0;z-index:2;margin:16px -18px 0;
+    padding:10px 18px calc(10px + env(safe-area-inset-bottom,0px));
+    background:linear-gradient(to bottom,rgba(255,255,255,0) 0,var(--paint) 14px,var(--paint) 100%);
+  }
+  body.quiz-live #nextBtn,body.quiz-live.answered #nextBtn{padding:15px 24px;font-size:17px}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
