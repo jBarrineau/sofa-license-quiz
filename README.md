@@ -6,8 +6,8 @@ A single-page practice quiz for the U.S. Forces Japan SOFA driver's permit test.
 
 ## Features
 
-- **172 questions** across four topics — road signs (83), rules of the road (48), licensing & paperwork (22), signals & markings (19).
-- **93 embedded sign images and 3 manual diagrams**, so visual questions include the source material to identify.
+- **181 questions** across four topics — road signs (83), rules of the road (54), licensing & paperwork (24), signals & markings (20).
+- **125 keyed visuals**, including 93 embedded road signs and 32 source diagrams/photos, so visual questions include the material they ask about.
 - **Session setup** — filter to one topic or the whole bank, choose 20 questions, 50, or the full bank, and toggle question shuffling.
 - **Immediate feedback** — answer options are shuffled per question; a wrong pick shows the correct answer, why it's correct, and the briefing page it came from.
 - **Results breakdown** — overall score, a per-topic bar chart, and a list of everything you missed.
